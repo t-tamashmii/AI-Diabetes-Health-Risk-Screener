@@ -1,0 +1,173 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPl9RAKpNEeb7LPJH4vXcfr",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/t-tamashmii/AI-Diabetes-Health-Risk-Screener/blob/main/AI_Diabetes_Health_Risk_Screener.ipynb.\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "import numpy as np\n",
+        "import gradio as gr\n",
+        "\n",
+        "# ==========================================\n",
+        "# STEP 1: BUILD THE HISTORICAL MEMORY ARRAYS\n",
+        "# ==========================================\n",
+        "\n",
+        "X_data = np.array([\n",
+        "    [165, 88, 52],  # High Risk\n",
+        "    [148, 82, 45],  # High Risk\n",
+        "    [155, 90, 60],  # High Risk\n",
+        "    [172, 92, 58],  # High Risk\n",
+        "    [158, 86, 48],  # High Risk\n",
+        "    [95, 70, 25],   # Healthy / Normal\n",
+        "    [105, 74, 30],  # Healthy / Normal\n",
+        "    [88, 68, 22],   # Healthy / Normal\n",
+        "    [98, 72, 27],   # Healthy / Normal\n",
+        "    [90, 69, 24]    # Healthy / Normal\n",
+        "], dtype=float)\n",
+        "\n",
+        "y_results = np.array([\n",
+        "    1, 1, 1, 1, 1,\n",
+        "    0, 0, 0, 0, 0\n",
+        "])\n",
+        "\n",
+        "\n",
+        "# ==========================================\n",
+        "# STEP 2 & 3: DISTANCE MATH & BEST MATCH\n",
+        "# ==========================================\n",
+        "\n",
+        "def predict_outcome(glucose, bp, age):\n",
+        "\n",
+        "    # Convert user inputs into a NumPy array\n",
+        "    user = np.array([glucose, bp, age])\n",
+        "\n",
+        "    # Calculate absolute differences\n",
+        "    distances = np.sum(np.abs(X_data - user), axis=1)\n",
+        "\n",
+        "    # Find the index of the closest historical record\n",
+        "    closest_index = np.argmin(distances)\n",
+        "\n",
+        "    # Retrieve the corresponding result\n",
+        "    outcome = y_results[closest_index]\n",
+        "\n",
+        "    # Return prediction using if-else\n",
+        "    if outcome == 1:\n",
+        "        return (\n",
+        "            f\"Prediction: HIGH RISK (1)\\n\"\n",
+        "            f\"Closest historical record: {closest_index}\"\n",
+        "        )\n",
+        "    else:\n",
+        "        return (\n",
+        "            f\"Prediction: NORMAL (0)\\n\"\n",
+        "            f\"Closest historical record: {closest_index}\"\n",
+        "        )\n",
+        "\n",
+        "\n",
+        "# ==========================================\n",
+        "# STEP 4: CREATE THE GRADIO WEB APPLICATION\n",
+        "# ==========================================\n",
+        "\n",
+        "demo = gr.Interface(\n",
+        "    fn=predict_outcome,\n",
+        "\n",
+        "    inputs=[\n",
+        "        gr.Number(\n",
+        "            label=\"Glucose (60 - 220 mg/dL)\",\n",
+        "            value=110.0\n",
+        "        ),\n",
+        "        gr.Number(\n",
+        "            label=\"Blood Pressure (50 - 120 mm Hg)\",\n",
+        "            value=75.0\n",
+        "        ),\n",
+        "        gr.Number(\n",
+        "            label=\"Age (18 - 90 Years)\",\n",
+        "            value=30.0\n",
+        "        )\n",
+        "    ],\n",
+        "\n",
+        "    outputs=gr.Textbox(label=\"Prediction Result\"),\n",
+        "\n",
+        "    title=\"AI Diabetes & Health Risk Screener\",\n",
+        "\n",
+        "    description=(\n",
+        "        \"Enter glucose, blood pressure and age \"\n",
+        "        \"to find the closest historical record. \"\n",
+        "        \"Educational demonstration only - not a medical diagnosis.\"\n",
+        "    )\n",
+        ")\n",
+        "\n",
+        "\n",
+        "# ==========================================\n",
+        "# LAUNCH THE WEB APPLICATION\n",
+        "# ==========================================\n",
+        "\n",
+        "demo.launch(share=True)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 613
+        },
+        "id": "4mXoh8at3Dkz",
+        "outputId": "794bd497-3e02-485e-cd8e-6d92591b3234"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Colab notebook detected. To show errors in colab notebook, set debug=True in launch()\n",
+            "* Running on public URL: https://4a3e5d3dff05fac1c4.gradio.live\n",
+            "\n",
+            "This share link is temporary and will last for up to 1 week (best effort). For free permanent hosting and GPU upgrades, run `gradio deploy` from the terminal in the working directory to deploy to Hugging Face Spaces (https://huggingface.co/spaces)\n"
+          ]
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "<div><iframe src=\"https://4a3e5d3dff05fac1c4.gradio.live\" width=\"100%\" height=\"500\" allow=\"autoplay; camera; microphone; clipboard-read; clipboard-write;\" frameborder=\"0\" allowfullscreen></iframe></div>"
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": []
+          },
+          "metadata": {},
+          "execution_count": 2
+        }
+      ]
+    }
+  ]
+}
